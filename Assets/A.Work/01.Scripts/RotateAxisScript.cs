@@ -7,7 +7,7 @@ public class RotateAxisScript : MonoBehaviour
 
     public Camera mainCamera;
     public CinemachineCamera vcam;
-    private bool is3DMode = false;
+    private bool is3DMode = true;
 
     private void Awake()
     {
@@ -40,7 +40,7 @@ public class RotateAxisScript : MonoBehaviour
 
         if (is3DMode)
         {
-            vcam.transform.rotation = Quaternion.Euler(20, 0, 0);
+            vcam.transform.rotation = Quaternion.Euler(25, 0, 0);
         }
         else
         {
