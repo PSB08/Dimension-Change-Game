@@ -1,16 +1,58 @@
+using Unity.Cinemachine;
 using UnityEngine;
 
 public class RotateAxisScript : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private ViewSwitchCollider[] viewSwitchObjects;
+
+    public Camera mainCamera;
+    public CinemachineCamera vcam;
+    private bool is3DMode = false;
+
+    private void Awake()
     {
-        
+        viewSwitchObjects = FindObjectsOfType<ViewSwitchCollider>();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Start()
     {
-        
+        ApplyView(); // 시작할 때 현재 뷰에 맞게 설정
     }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            SwitchView();
+        }
+    }
+
+    private void SwitchView()
+    {
+        is3DMode = !is3DMode;
+        ApplyView();
+    }
+
+    private void ApplyView()
+    {
+        mainCamera.orthographic = !is3DMode;
+        mainCamera.transform.position = is3DMode ? new Vector3(0, 5, -10) : new Vector3(0, 0, -10);
+
+        if (is3DMode)
+        {
+            vcam.transform.rotation = Quaternion.Euler(20, 0, 0);
+        }
+        else
+        {
+            vcam.transform.rotation = Quaternion.identity;
+        }
+
+        foreach (var obj in viewSwitchObjects)
+        {
+            obj.SetView(is3DMode);
+        }
+    }
+    
+    
+    
 }
