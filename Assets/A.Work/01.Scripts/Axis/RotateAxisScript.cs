@@ -21,7 +21,7 @@ public class RotateAxisScript : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F))
+        if (Input.GetKeyDown(KeyCode.F))  //쿨타임 만들기
         {
             SwitchView();
         }

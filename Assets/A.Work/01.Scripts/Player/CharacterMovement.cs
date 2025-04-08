@@ -22,8 +22,10 @@ public class CharacterMovement : MonoBehaviour
 
         public void Jump()
         {
-            if (IsGrounded)
+            if (IsGrounded && Mathf.Approximately(_movementDirection.x, 0f))
+            {
                 _verticalVelocity = Mathf.Sqrt(jumpHeight * -1f * gravity);
+            }
         }
 
         private void FixedUpdate()
@@ -60,7 +62,15 @@ public class CharacterMovement : MonoBehaviour
 
         private void Move()
         {
-            controller.Move(_velocity);
+            Vector3 finalVelocity = _velocity;
+
+            // 점프 중이면 x 이동 막기, z는 유지
+            if (!IsGrounded)
+            {
+                finalVelocity.x = 0;
+            }
+
+            controller.Move(finalVelocity);
         }
 
 
