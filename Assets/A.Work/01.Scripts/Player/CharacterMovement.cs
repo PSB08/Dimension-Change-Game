@@ -1,8 +1,10 @@
 using UnityEngine;
 
-public class CharacterMovement : MonoBehaviour
+namespace Script.Player
 {
-    [SerializeField] private float moveSpeed = 8f;
+    public class CharacterMovement : MonoBehaviour
+    {
+        [SerializeField] private float moveSpeed = 8f;
         [SerializeField] private float gravity = -9.8f;
         [SerializeField] private float jumpHeight = 1f;
         [SerializeField] private CharacterController controller;
@@ -10,6 +12,8 @@ public class CharacterMovement : MonoBehaviour
 
         public bool IsGrounded => controller.isGrounded;
 
+        public bool isResetting;
+        
         private Vector3 _velocity;
         public Vector3 Velocity => _velocity;
         private float _verticalVelocity;
@@ -63,8 +67,7 @@ public class CharacterMovement : MonoBehaviour
         private void Move()
         {
             Vector3 finalVelocity = _velocity;
-
-            // 점프 중이면 x 이동 막기, z는 유지
+            
             if (!IsGrounded)
             {
                 finalVelocity.x = 0;
@@ -76,4 +79,5 @@ public class CharacterMovement : MonoBehaviour
 
     
     
+    }
 }

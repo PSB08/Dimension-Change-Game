@@ -1,6 +1,8 @@
 using Unity.Cinemachine;
 using UnityEngine;
 
+namespace Script.Axis
+{
 public class RotateAxisScript : MonoBehaviour
 {
     private ViewSwitchCollider[] viewSwitchObjects;
@@ -56,3 +58,6 @@ public class RotateAxisScript : MonoBehaviour
     
     
 }
+    
+}
+
