@@ -28,7 +28,7 @@ namespace Script.Player
         {
             if (IsGrounded && Mathf.Approximately(_movementDirection.x, 0f))
             {
-                _verticalVelocity = Mathf.Sqrt(jumpHeight * -1f * gravity);
+                _verticalVelocity = Mathf.Sqrt(jumpHeight * -0.5f * gravity);
             }
         }
 

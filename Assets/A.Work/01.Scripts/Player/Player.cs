@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 namespace Script.Player
@@ -7,6 +8,7 @@ namespace Script.Player
     {
         [SerializeField] private CharacterMovement movement;
         [SerializeField] private PlayerInputSO playerInput;
+        [SerializeField] private Transform trans;
         private bool isSprinted = false;
     
         private void Awake()
@@ -36,9 +38,22 @@ namespace Script.Player
 
         private void HandleAttackPressed()
         {
-            Debug.Log("Red Player Attack");
+            
         }
 
+        private void OnControllerColliderHit(ControllerColliderHit hit)
+        {
+            if (hit.gameObject.layer == LayerMask.NameToLayer("ResetGround"))
+            {
+                StartCoroutine(RespawnCoroutine());
+            }
+        }
+
+        private IEnumerator RespawnCoroutine()
+        {
+            transform.position = trans.position;
+            yield return new WaitForSeconds(1f);
+        }
         
         
     }
