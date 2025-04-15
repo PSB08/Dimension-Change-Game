@@ -9,7 +9,7 @@ using UnityEditor;
 public class CombineMesh : MonoBehaviour
 {
     public GameObject[] go;
-    public Vector3 offset = Vector3.zero; // 내가 원하는 위치로 mesh만 이동
+    public Vector3 offset = Vector3.zero;
 
     private void Start()
     {
@@ -22,8 +22,7 @@ public class CombineMesh : MonoBehaviour
 
             Matrix4x4 worldToLocal = transform.worldToLocalMatrix;
             Matrix4x4 meshMatrix = meshFilters[i].transform.localToWorldMatrix;
-
-            // Mesh를 월드 기준으로 가져오고 offset만큼 이동한 후 내 로컬 공간으로 맞춰줌
+            
             Matrix4x4 finalMatrix = worldToLocal * meshMatrix * Matrix4x4.Translate(offset);
 
             combine[i].mesh = meshFilters[i].sharedMesh;
@@ -34,11 +33,9 @@ public class CombineMesh : MonoBehaviour
         combinedMesh.name = "CombinedMesh";
         combinedMesh.CombineMeshes(combine, true, true);
 
-        // MeshFilter에 넣기
         MeshFilter meshFilter = GetComponent<MeshFilter>();
         meshFilter.sharedMesh = combinedMesh;
 
-        // MeshCollider에도 넣기
         MeshCollider meshCollider = GetComponent<MeshCollider>();
         if (meshCollider == null)
         {
@@ -49,11 +46,21 @@ public class CombineMesh : MonoBehaviour
 
 #if UNITY_EDITOR
         {
-            string path = "Assets/MyMesh.asset";
+            string path = "Assets/A.Work/Mesh/MyMesh.asset";
             string uniquePath = AssetDatabase.GenerateUniqueAssetPath(path);
 
             Mesh existingMesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
-            if (existingMesh == null)
+
+            bool isSameMesh = false;
+
+            if (existingMesh != null)
+            {
+                // 간단 비교: vertex count와 bounds 비교
+                isSameMesh = existingMesh.vertexCount == combinedMesh.vertexCount &&
+                             existingMesh.bounds.size == combinedMesh.bounds.size;
+            }
+
+            if (!isSameMesh)
             {
                 AssetDatabase.CreateAsset(combinedMesh, uniquePath);
                 AssetDatabase.SaveAssets();
@@ -68,4 +75,8 @@ public class CombineMesh : MonoBehaviour
         }
 #endif
     }
+    
+    
+    
+    
 }
