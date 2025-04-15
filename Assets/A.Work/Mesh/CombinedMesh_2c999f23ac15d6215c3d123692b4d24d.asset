@@ -6,7 +6,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: MyMesh 15
+  m_Name: CombinedMesh_2c999f23ac15d6215c3d123692b4d24d
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2

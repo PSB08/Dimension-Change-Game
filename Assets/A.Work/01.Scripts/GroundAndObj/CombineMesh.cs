@@ -1,9 +1,10 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
+using System.Security.Cryptography;
+using System.Text;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+using UnityEngine;
 
 [RequireComponent(typeof(MeshRenderer), typeof(MeshFilter))]
 public class CombineMesh : MonoBehaviour
@@ -13,70 +14,94 @@ public class CombineMesh : MonoBehaviour
 
     private void Start()
     {
-        MeshFilter[] meshFilters = new MeshFilter[go.Length];
-        CombineInstance[] combine = new CombineInstance[go.Length];
+        if (go == null || go.Length == 0)
+        {
+            Debug.LogWarning("CombineMesh: GameObject array 'go' is null or empty.");
+            return;
+        }
+
+        List<CombineInstance> combineList = new List<CombineInstance>();
 
         for (int i = 0; i < go.Length; i++)
         {
-            meshFilters[i] = go[i].GetComponent<MeshFilter>();
+            if (go[i] == null)
+            {
+                Debug.LogWarning($"CombineMesh: GameObject at index {i} is null. Skipping.");
+                continue;
+            }
+
+            MeshFilter mf = go[i].GetComponent<MeshFilter>();
+            if (mf == null || mf.sharedMesh == null)
+            {
+                Debug.LogWarning($"CombineMesh: MeshFilter or sharedMesh missing on GameObject '{go[i].name}'. Skipping.");
+                continue;
+            }
 
             Matrix4x4 worldToLocal = transform.worldToLocalMatrix;
-            Matrix4x4 meshMatrix = meshFilters[i].transform.localToWorldMatrix;
-            
+            Matrix4x4 meshMatrix = mf.transform.localToWorldMatrix;
             Matrix4x4 finalMatrix = worldToLocal * meshMatrix * Matrix4x4.Translate(offset);
 
-            combine[i].mesh = meshFilters[i].sharedMesh;
-            combine[i].transform = finalMatrix;
+            CombineInstance ci = new CombineInstance
+            {
+                mesh = mf.sharedMesh,
+                transform = finalMatrix
+            };
+
+            combineList.Add(ci);
+        }
+
+        if (combineList.Count == 0)
+        {
+            Debug.LogWarning("CombineMesh: No valid meshes found to combine.");
+            return;
         }
 
         Mesh combinedMesh = new Mesh();
         combinedMesh.name = "CombinedMesh";
-        combinedMesh.CombineMeshes(combine, true, true);
+        combinedMesh.CombineMeshes(combineList.ToArray(), true, true);
 
         MeshFilter meshFilter = GetComponent<MeshFilter>();
         meshFilter.sharedMesh = combinedMesh;
 
-        MeshCollider meshCollider = GetComponent<MeshCollider>();
-        if (meshCollider == null)
-        {
-            meshCollider = gameObject.AddComponent<MeshCollider>();
-        }
+        MeshCollider meshCollider = GetComponent<MeshCollider>() ?? gameObject.AddComponent<MeshCollider>();
         meshCollider.sharedMesh = combinedMesh;
         meshCollider.convex = false;
 
 #if UNITY_EDITOR
+        string meshInfo = combinedMesh.vertexCount.ToString() + combinedMesh.bounds.ToString() + offset.ToString();
+        string hash = GetMD5Hash(meshInfo);
+        string path = $"Assets/A.Work/Mesh/CombinedMesh_{hash}.asset";
+
+        Mesh existingMesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
+
+        if (existingMesh == null)
         {
-            string path = "Assets/A.Work/Mesh/MyMesh.asset";
-            string uniquePath = AssetDatabase.GenerateUniqueAssetPath(path);
-
-            Mesh existingMesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
-
-            bool isSameMesh = false;
-
-            if (existingMesh != null)
-            {
-                // 간단 비교: vertex count와 bounds 비교
-                isSameMesh = existingMesh.vertexCount == combinedMesh.vertexCount &&
-                             existingMesh.bounds.size == combinedMesh.bounds.size;
-            }
-
-            if (!isSameMesh)
-            {
-                AssetDatabase.CreateAsset(combinedMesh, uniquePath);
-                AssetDatabase.SaveAssets();
-                Debug.Log("New mesh saved to: " + uniquePath);
-            }
-            else
-            {
-                meshFilter.sharedMesh = existingMesh;
-                meshCollider.sharedMesh = existingMesh;
-                Debug.Log("Using existing mesh asset at: " + path);
-            }
+            AssetDatabase.CreateAsset(combinedMesh, path);
+            AssetDatabase.SaveAssets();
+            Debug.Log("New mesh saved to: " + path);
+        }
+        else
+        {
+            meshFilter.sharedMesh = existingMesh;
+            meshCollider.sharedMesh = existingMesh;
+            Debug.Log("Using existing mesh asset at: " + path);
         }
 #endif
     }
-    
-    
-    
-    
+
+#if UNITY_EDITOR
+    private string GetMD5Hash(string input)
+    {
+        using (MD5 md5 = MD5.Create())
+        {
+            byte[] inputBytes = Encoding.UTF8.GetBytes(input);
+            byte[] hashBytes = md5.ComputeHash(inputBytes);
+
+            StringBuilder sb = new StringBuilder();
+            foreach (byte b in hashBytes)
+                sb.Append(b.ToString("x2"));
+            return sb.ToString();
+        }
+    }
+#endif
 }
