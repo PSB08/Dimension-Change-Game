@@ -10,6 +10,7 @@ namespace Script.Player
         [SerializeField] private PlayerInputSO playerInput;
         [SerializeField] private Transform trans;
         private bool isSprinted = false;
+        public int cnt = 0;
     
         private void Awake()
         {
@@ -51,6 +52,7 @@ namespace Script.Player
 
         private IEnumerator RespawnCoroutine()
         {
+            cnt++;
             transform.position = trans.position;
             yield return new WaitForSeconds(1f);
         }
