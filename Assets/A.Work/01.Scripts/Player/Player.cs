@@ -8,6 +8,7 @@ namespace Script.Player
     {
         [SerializeField] private CharacterMovement movement;
         [SerializeField] private PlayerInputSO playerInput;
+        [SerializeField] private Animator animator;
         [SerializeField] private Transform trans;
         private bool isSprinted = false;
         public int cnt = 0;
@@ -26,15 +27,23 @@ namespace Script.Player
             playerInput.OnAttackPressed -= HandleAttackPressed;
         }
 
-        private void HandleMovementChange(Vector2 movementnput)
+        private void HandleMovementChange(Vector2 movementInput)
         {
-            movement.SetMovementDirection(movementnput);
+            movement.SetMovementDirection(movementInput);
+
+            bool isMoving = movementInput.magnitude > 0.1f;
+
+            animator.SetBool("WALK", isMoving);
+            animator.SetBool("IDLE", !isMoving);
         }
 
         private void HandleJumpPressed()
         {
             if (movement.IsGrounded)
+            {
                 movement.Jump();
+                animator.SetTrigger("JUMP");
+            }
         }
 
         private void HandleAttackPressed()
